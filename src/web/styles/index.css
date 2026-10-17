@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Google Sans Flex";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  font-stretch: 75% 125%;
+  src: url("../assets/fonts/GoogleSansFlex-latin.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Google Sans Flex";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  font-stretch: 75% 125%;
+  src: url("../assets/fonts/GoogleSansFlex-latin-ext.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Material Symbols Rounded";
+  font-style: normal;
+  font-display: block;
+  font-weight: 100 700;
+  src: url("../assets/fonts/MaterialSymbolsRounded.woff2") format("woff2-variations");
+}
+
+@property --md-sys-color-primary { syntax: "<color>"; inherits: true; initial-value: #f6bc6f; }
+@property --md-sys-color-on-primary { syntax: "<color>"; inherits: true; initial-value: #462b00; }
+@property --md-sys-color-primary-container { syntax: "<color>"; inherits: true; initial-value: #643f00; }
+@property --md-sys-color-on-primary-container { syntax: "<color>"; inherits: true; initial-value: #ffddb5; }
+@property --md-sys-color-secondary { syntax: "<color>"; inherits: true; initial-value: #dec2a2; }
+@property --md-sys-color-on-secondary { syntax: "<color>"; inherits: true; initial-value: #3e2d16; }
+@property --md-sys-color-secondary-container { syntax: "<color>"; inherits: true; initial-value: #57432b; }
+@property --md-sys-color-on-secondary-container { syntax: "<color>"; inherits: true; initial-value: #fbdebc; }
+@property --md-sys-color-tertiary { syntax: "<color>"; inherits: true; initial-value: #b9cda0; }
+@property --md-sys-color-on-tertiary { syntax: "<color>"; inherits: true; initial-value: #253514; }
+@property --md-sys-color-tertiary-container { syntax: "<color>"; inherits: true; initial-value: #3b4c29; }
+@property --md-sys-color-on-tertiary-container { syntax: "<color>"; inherits: true; initial-value: #d5eaba; }
+@property --md-sys-color-error { syntax: "<color>"; inherits: true; initial-value: #ffb4ab; }
+@property --md-sys-color-on-error { syntax: "<color>"; inherits: true; initial-value: #690005; }
+@property --md-sys-color-error-container { syntax: "<color>"; inherits: true; initial-value: #93000a; }
+@property --md-sys-color-on-error-container { syntax: "<color>"; inherits: true; initial-value: #ffdad6; }
+@property --md-sys-color-surface { syntax: "<color>"; inherits: true; initial-value: #18120b; }
+@property --md-sys-color-on-surface { syntax: "<color>"; inherits: true; initial-value: #ede0d4; }
+@property --md-sys-color-on-surface-variant { syntax: "<color>"; inherits: true; initial-value: #d3c4b4; }
+@property --md-sys-color-surface-container-lowest { syntax: "<color>"; inherits: true; initial-value: #130d07; }
+@property --md-sys-color-surface-container-low { syntax: "<color>"; inherits: true; initial-value: #211b13; }
+@property --md-sys-color-surface-container { syntax: "<color>"; inherits: true; initial-value: #251f17; }
+@property --md-sys-color-surface-container-high { syntax: "<color>"; inherits: true; initial-value: #302921; }
+@property --md-sys-color-surface-container-highest { syntax: "<color>"; inherits: true; initial-value: #3b342b; }
+@property --md-sys-color-outline { syntax: "<color>"; inherits: true; initial-value: #9c8f80; }
+@property --md-sys-color-outline-variant { syntax: "<color>"; inherits: true; initial-value: #4f4539; }
+@property --md-sys-color-inverse-surface { syntax: "<color>"; inherits: true; initial-value: #ede0d4; }
+@property --md-sys-color-inverse-on-surface { syntax: "<color>"; inherits: true; initial-value: #362f27; }
+@property --md-sys-color-inverse-primary { syntax: "<color>"; inherits: true; initial-value: #805611; }
+@property --md-sys-color-scrim { syntax: "<color>"; inherits: true; initial-value: #000000; }
+@property --md-sys-color-surface-dim { syntax: "<color>"; inherits: true; initial-value: #18120b; }
+@property --md-sys-color-surface-bright { syntax: "<color>"; inherits: true; initial-value: #3f3830; }
+
+:root {
+  transition:
+    --md-sys-color-primary 600ms ease,
+    --md-sys-color-on-primary 600ms ease,
+    --md-sys-color-primary-container 600ms ease,
+    --md-sys-color-on-primary-container 600ms ease,
+    --md-sys-color-secondary 600ms ease,
+    --md-sys-color-on-secondary 600ms ease,
+    --md-sys-color-secondary-container 600ms ease,
+    --md-sys-color-on-secondary-container 600ms ease,
+    --md-sys-color-tertiary 600ms ease,
+    --md-sys-color-on-tertiary 600ms ease,
+    --md-sys-color-tertiary-container 600ms ease,
+    --md-sys-color-on-tertiary-container 600ms ease,
+    --md-sys-color-error 600ms ease,
+    --md-sys-color-on-error 600ms ease,
+    --md-sys-color-error-container 600ms ease,
+    --md-sys-color-on-error-container 600ms ease,
+    --md-sys-color-surface 600ms ease,
+    --md-sys-color-on-surface 600ms ease,
+    --md-sys-color-on-surface-variant 600ms ease,
+    --md-sys-color-surface-container-lowest 600ms ease,
+    --md-sys-color-surface-container-low 600ms ease,
+    --md-sys-color-surface-container 600ms ease,
+    --md-sys-color-surface-container-high 600ms ease,
+    --md-sys-color-surface-container-highest 600ms ease,
+    --md-sys-color-outline 600ms ease,
+    --md-sys-color-outline-variant 600ms ease,
+    --md-sys-color-inverse-surface 600ms ease,
+    --md-sys-color-inverse-on-surface 600ms ease,
+    --md-sys-color-inverse-primary 600ms ease,
+    --md-sys-color-scrim 600ms ease,
+    --md-sys-color-surface-dim 600ms ease,
+    --md-sys-color-surface-bright 600ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { transition: none; }
+}
+
+@theme inline {
+  --color-primary: var(--md-sys-color-primary);
+  --color-on-primary: var(--md-sys-color-on-primary);
+  --color-primary-container: var(--md-sys-color-primary-container);
+  --color-on-primary-container: var(--md-sys-color-on-primary-container);
+  --color-secondary: var(--md-sys-color-secondary);
+  --color-on-secondary: var(--md-sys-color-on-secondary);
+  --color-secondary-container: var(--md-sys-color-secondary-container);
+  --color-on-secondary-container: var(--md-sys-color-on-secondary-container);
+  --color-tertiary: var(--md-sys-color-tertiary);
+  --color-on-tertiary: var(--md-sys-color-on-tertiary);
+  --color-tertiary-container: var(--md-sys-color-tertiary-container);
+  --color-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+  --color-error: var(--md-sys-color-error);
+  --color-on-error: var(--md-sys-color-on-error);
+  --color-error-container: var(--md-sys-color-error-container);
+  --color-on-error-container: var(--md-sys-color-on-error-container);
+  --color-surface: var(--md-sys-color-surface);
+  --color-on-surface: var(--md-sys-color-on-surface);
+  --color-on-surface-variant: var(--md-sys-color-on-surface-variant);
+  --color-surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+  --color-surface-container-low: var(--md-sys-color-surface-container-low);
+  --color-surface-container: var(--md-sys-color-surface-container);
+  --color-surface-container-high: var(--md-sys-color-surface-container-high);
+  --color-surface-container-highest: var(--md-sys-color-surface-container-highest);
+  --color-outline: var(--md-sys-color-outline);
+  --color-outline-variant: var(--md-sys-color-outline-variant);
+  --color-inverse-surface: var(--md-sys-color-inverse-surface);
+  --color-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+  --color-inverse-primary: var(--md-sys-color-inverse-primary);
+  --color-scrim: var(--md-sys-color-scrim);
+  --color-surface-dim: var(--md-sys-color-surface-dim);
+  --color-surface-bright: var(--md-sys-color-surface-bright);
+
+  --breakpoint-medium: 600px;
+  --breakpoint-expanded: 840px;
+
+  --font-sans: "Google Sans Flex", "Google Sans", system-ui, sans-serif;
+
+  --radius-none: 0;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-lg-increased: 20px;
+  --radius-xl: 28px;
+  --radius-xl-increased: 32px;
+  --radius-xxl: 48px;
+}
+
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.material-symbols-rounded.filled {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+:root {
+  color-scheme: dark;
+}
+:root.light {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.display-md {
+  font-size: clamp(24px, 4.2vw, 45px);
+  line-height: 1.15;
+  font-weight: 600;
+  font-variation-settings: "ROND" 100;
+  letter-spacing: -0.015em;
+}
+
+.headline-lg {
+  font-size: clamp(20px, 2.6vw, 30px);
+  line-height: 1.24;
+  font-weight: 600;
+  font-variation-settings: "ROND" 100;
+  letter-spacing: -0.01em;
+}
+
+.title-lg {
+  font-size: 21px;
+  line-height: 28px;
+  font-weight: 500;
+}
+
+.title-md {
+  font-size: 15.5px;
+  line-height: 23px;
+  font-weight: 500;
+}
+
+@keyframes shimmer-slide {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklab, var(--md-sys-color-on-surface) 8%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation: none;
+  }
+}
+
+.radial-glow {
+  background:
+    radial-gradient(60% 50% at 30% 20%, color-mix(in oklab, var(--md-sys-color-primary) 20%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 80% 80%, color-mix(in oklab, var(--md-sys-color-secondary) 16%, transparent), transparent 70%);
+}
+
+@keyframes morph-spin {
+  0% {
+    transform: rotate(0deg);
+    border-radius: 48%;
+  }
+  50% {
+    border-radius: 14%;
+  }
+  100% {
+    transform: rotate(360deg);
+    border-radius: 48%;
+  }
+}
+
+@utility animate-morph-spin {
+  animation: morph-spin 1.8s linear infinite;
+}
+
+@utility animate-spin-slow {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes lr-vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
