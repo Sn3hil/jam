@@ -34,7 +34,8 @@ export function makeAuthRoutes(deps: AuthRouteDeps) {
     const passwordHash = await hashPassword(body.password);
     try {
       const user = deps.users.create(body.username, body.displayName, passwordHash);
-      const cookie = deps.session.createCookie(user.id, deps.publicOrigin.startsWith("https://"));
+      const isSecure = deps.publicOrigin.startsWith("https://") || req.headers.get("x-forwarded-proto") === "https";
+      const cookie = deps.session.createCookie(user.id, isSecure);
       log.info(`signup: new user ${user.username} (#${user.id})`);
       return json(201, { user: toDTO(user) }, { "set-cookie": cookie });
     } catch (error) {
@@ -66,7 +67,8 @@ export function makeAuthRoutes(deps: AuthRouteDeps) {
     }
     if (!user) throw fail(401, "BAD_CREDENTIALS", "Wrong username or password.");
     const fresh = deps.users.getById(user.id) ?? user;
-    const cookie = deps.session.createCookie(fresh.id, deps.publicOrigin.startsWith("https://"));
+    const isSecure = deps.publicOrigin.startsWith("https://") || req.headers.get("x-forwarded-proto") === "https";
+    const cookie = deps.session.createCookie(fresh.id, isSecure);
     return json(200, { user: toDTO(fresh) }, { "set-cookie": cookie });
   });
 

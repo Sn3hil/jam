@@ -14,9 +14,30 @@ export function requireUser(ctx: Ctx, req: Request): User {
   return user;
 }
 
-export function assertSameOrigin(ctx: Ctx, req: Request): void {
+export function isAllowedOrigin(publicOrigin: string, req: Request): boolean {
   const origin = req.headers.get("origin");
-  if (origin && origin !== ctx.publicOrigin) {
+  if (!origin) return true;
+  if (origin === publicOrigin) return true;
+
+  // Check forwarded or host header for reverse proxies / tunnels (e.g. Cloudflare tunnel)
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") ?? (req.url.startsWith("https") ? "https" : "http");
+  if (host) {
+    if (origin === `${proto}://${host}` || origin === `https://${host}` || origin === `http://${host}`) {
+      return true;
+    }
+  }
+
+  try {
+    const reqOrigin = new URL(req.url).origin;
+    if (origin === reqOrigin) return true;
+  } catch {}
+
+  return false;
+}
+
+export function assertSameOrigin(ctx: Ctx, req: Request): void {
+  if (!isAllowedOrigin(ctx.publicOrigin, req)) {
     throw fail(403, "FORBIDDEN", "Cross-origin requests are not allowed.");
   }
 }

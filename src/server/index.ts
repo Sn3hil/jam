@@ -18,6 +18,7 @@ import { makeQueueRoutes } from "./http/queue.routes";
 import { makeHistoryRoutes } from "./http/history.routes";
 import { wsMessageHandlers, type WsData } from "./ws";
 import { ApiError, fail } from "./http/errors";
+import { isAllowedOrigin } from "./http/middleware";
 import { parseYouTubeInput } from "@shared/youtubeUrl";
 import { Room } from "@server/room/Room";
 import { TrackEncoder } from "@server/audio/TrackEncoder";
@@ -214,8 +215,7 @@ export async function bootServer() {
       const url = new URL(req.url);
       const isUpgrade = req.headers.get("upgrade")?.toLowerCase() === "websocket";
       if (url.pathname === "/ws" && isUpgrade) {
-        const origin = req.headers.get("origin");
-        if (origin && origin !== config.publicOrigin) {
+        if (!isAllowedOrigin(config.publicOrigin, req)) {
           return new Response("Forbidden", { status: 403 });
         }
         if (req.headers.get("sec-websocket-protocol") === "lr") {
