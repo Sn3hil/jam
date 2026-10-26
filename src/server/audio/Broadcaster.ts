@@ -2,9 +2,10 @@ import type { FrameSource } from "./TrackEncoder";
 import { FRAME_MS } from "./mp3Framer";
 import type { Mp3Frame } from "./mp3Framer";
 
-export const LEAD_FRAMES = 115;
+export const LEAD_FRAMES = 20;
 const LEAD_MS = LEAD_FRAMES * FRAME_MS;
-const DROP_BACKPRESSURE_BYTES = -262144;
+const RING_CAPACITY = LEAD_FRAMES + 10;
+const DROP_BACKPRESSURE_BYTES = -65536;
 
 export interface BroadcasterClient {
   readonly id: number;
@@ -50,7 +51,7 @@ export class Broadcaster {
   constructor(deps: BroadcasterDeps) {
     this.silenceFrames = deps.silenceFrames;
     this.clock = deps.clock;
-    this.intervalMs = deps.intervalMs ?? 100;
+    this.intervalMs = deps.intervalMs ?? 40;
   }
 
   get isPaused(): boolean {
@@ -81,10 +82,13 @@ export class Broadcaster {
         clearInterval(this.timer);
         this.timer = null;
       }
+      this.ring = [];
+      this.ringCursor = 0;
       return;
     }
     this.anchor = this.clock();
-    this.emitted = 0;
+    // Only burst LEAD_FRAMES if the ring buffer is empty; otherwise pace at 1x real-time
+    this.emitted = this.ring.length > 0 ? LEAD_FRAMES : 0;
     this.trackEndedReported = false;
     this.timer = setInterval(() => {
       try {
@@ -96,14 +100,13 @@ export class Broadcaster {
   }
 
   setTrack(source: FrameSource | null): void {
+    if (this.source === source && source !== null) return;
     this.source = source;
     this.nextSource = null;
     this.trackFramesEmitted = 0;
     this.trackEndedReported = false;
-    if (source === null) {
-      this.ring = [];
-      this.ringCursor = 0;
-    }
+    this.ring = [];
+    this.ringCursor = 0;
   }
 
   setNextSource(source: FrameSource | null): void {
@@ -116,12 +119,15 @@ export class Broadcaster {
   ): BroadcasterClient {
     const full: BroadcasterClient = { ...client, controller, startedAtMs: this.clock() };
     this.clients.set(full.id, full);
-    const intro = this.concatFrames(this.ringInOrder());
-    if (intro.length > 0) {
-      try {
-        full.controller.enqueue(intro);
-      } catch {
-        this.clients.delete(full.id);
+    // Only send intro burst if actively playing a track
+    if (!this.paused && this.source !== null) {
+      const intro = this.concatFrames(this.ringInOrder());
+      if (intro.length > 0) {
+        try {
+          full.controller.enqueue(intro);
+        } catch {
+          this.clients.delete(full.id);
+        }
       }
     }
     return full;
@@ -140,6 +146,8 @@ export class Broadcaster {
       clearInterval(this.timer);
       this.timer = null;
     }
+    this.ring = [];
+    this.ringCursor = 0;
     this.clients.clear();
   }
 
@@ -162,6 +170,8 @@ export class Broadcaster {
             this.source = this.nextSource;
             this.nextSource = null;
             this.trackFramesEmitted = 0;
+            this.ring = [];
+            this.ringCursor = 0;
             prevSource.kill();
             this.onEvent?.({ type: "track_switched" });
             const taken2 = this.source.take(1);
@@ -170,8 +180,12 @@ export class Broadcaster {
               this.trackFramesEmitted += 1;
             }
           } else {
+            const prevSource = this.source;
             this.source = null;
             this.trackFramesEmitted = 0;
+            this.ring = [];
+            this.ringCursor = 0;
+            prevSource.kill();
             endedNow = true;
           }
         }
@@ -185,7 +199,9 @@ export class Broadcaster {
     }
     if (out.length > 0) {
       const payload = this.concatFrames(out);
-      this.appendRing(out);
+      if (this.source !== null) {
+        this.appendRing(out);
+      }
       for (const [id, client] of this.clients) {
         try {
           client.controller.enqueue(payload);
@@ -216,19 +232,18 @@ export class Broadcaster {
   }
 
   private appendRing(frames: Mp3Frame[]): void {
-    const capacity = LEAD_FRAMES + 40;
     for (const frame of frames) {
-      if (this.ring.length < capacity) {
+      if (this.ring.length < RING_CAPACITY) {
         this.ring.push(frame);
       } else {
         this.ring[this.ringCursor] = frame;
-        this.ringCursor = (this.ringCursor + 1) % capacity;
+        this.ringCursor = (this.ringCursor + 1) % RING_CAPACITY;
       }
     }
   }
 
   private ringInOrder(): Mp3Frame[] {
-    if (this.ring.length < LEAD_FRAMES + 40) return this.ring;
+    if (this.ring.length < RING_CAPACITY) return this.ring;
     const head = this.ring.slice(this.ringCursor);
     const tail = this.ring.slice(0, this.ringCursor);
     return [...head, ...tail];

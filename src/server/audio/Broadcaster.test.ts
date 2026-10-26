@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Broadcaster, type BroadcasterEvent } from "./Broadcaster";
+import { Broadcaster, LEAD_FRAMES, type BroadcasterEvent } from "./Broadcaster";
 import { FRAME_MS } from "./mp3Framer";
 import type { Mp3Frame } from "./mp3Framer";
 import type { FrameSource } from "./TrackEncoder";
@@ -85,13 +85,13 @@ describe("Broadcaster", () => {
     const { controller, chunks } = captureStream();
     b.addClient({ id: 1, userId: 1 }, controller);
     b.tick();
-    expect(b.emittedFrames).toBe(115);
+    expect(b.emittedFrames).toBe(LEAD_FRAMES);
     clock.value = 1000;
     b.tick();
-    expect(b.emittedFrames).toBe(115 + 38);
+    expect(b.emittedFrames).toBe(LEAD_FRAMES + 38);
     expect(chunks.length).toBeGreaterThanOrEqual(2);
     const intro = chunks[0]!;
-    expect(intro.length).toBe(115 * 417);
+    expect(intro.length).toBe(LEAD_FRAMES * 417);
     expect(intro[3]).toBe(200);
     b.stop();
   });
@@ -99,6 +99,7 @@ describe("Broadcaster", () => {
   test("joining mid-stream receives ring backlog", () => {
     const { b, clock } = makeBroadcaster();
     b.start(false);
+    b.setTrack(fakeSource(Array.from({ length: 500 }, (_, i) => i)));
     const first = captureStream();
     b.addClient({ id: 1, userId: 1 }, first.controller);
     b.tick();
@@ -106,7 +107,7 @@ describe("Broadcaster", () => {
     b.tick();
     const second = captureStream();
     b.addClient({ id: 2, userId: 2 }, second.controller);
-    expect(second.chunks[0]!.length).toBe(155 * 417);
+    expect(second.chunks[0]!.length).toBe((LEAD_FRAMES + 10) * 417);
     b.stop();
   });
 
@@ -132,7 +133,7 @@ describe("Broadcaster", () => {
     b.start(false);
     b.addClient({ id: 1, userId: 1 }, captureStream().controller);
     b.tick();
-    expect(b.emittedFrames).toBe(115);
+    expect(b.emittedFrames).toBe(LEAD_FRAMES);
     expect(events.length).toBe(0);
     clock.value = 2000;
     b.tick();
@@ -158,11 +159,11 @@ describe("Broadcaster", () => {
     expect(b.emittedFrames).toBe(0);
     b.setPaused(false);
     b.tick();
-    expect(b.emittedFrames).toBe(115);
+    expect(b.emittedFrames).toBe(LEAD_FRAMES);
     b.setPaused(true);
     clock.value = 999999;
     b.tick();
-    expect(b.emittedFrames).toBe(115);
+    expect(b.emittedFrames).toBe(LEAD_FRAMES);
     b.stop();
   });
 });

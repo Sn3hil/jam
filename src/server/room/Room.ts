@@ -347,13 +347,17 @@ export class Room {
             this.deps.broadcaster.setNextSource(null);
           }
           this.queue.shift();
-          if (this.currentSource) this.deps.broadcaster.setTrack(this.currentSource);
           this.status = "playing";
           this.schedulePrefetch();
         } else {
+          if (this.prepared) {
+            this.prepared.source.kill();
+            this.prepared = null;
+          }
           this.current = null;
           this.currentSource = null;
           this.status = "idle";
+          this.deps.broadcaster.setTrack(null);
         }
         this.publishState();
       });
@@ -374,10 +378,18 @@ export class Room {
       }
       const next = this.queue[0];
       if (!next) {
+        if (this.currentSource) {
+          this.currentSource.kill();
+          this.currentSource = null;
+        }
+        if (this.prepared) {
+          this.prepared.source.kill();
+          this.prepared = null;
+        }
         this.current = null;
-        this.currentSource = null;
         this.status = "idle";
         this.deps.broadcaster.setTrack(null);
+        this.deps.broadcaster.setPaused(true);
         this.publishState();
         return;
       }
@@ -392,6 +404,10 @@ export class Room {
         source = this.prepared.source;
         this.prepared = null;
       } else {
+        if (this.prepared) {
+          this.prepared.source.kill();
+          this.prepared = null;
+        }
         try {
           source = await this.deps.startEncoder(next);
         } catch {
@@ -405,6 +421,7 @@ export class Room {
       this.currentSource = source;
       this.deps.broadcaster.setTrack(source);
       this.deps.broadcaster.setNextSource(null);
+      this.deps.broadcaster.setPaused(false);
       this.userPaused = false;
       this.status = "playing";
       this.publishState();
@@ -455,9 +472,17 @@ export class Room {
     const item = this.current?.item;
     this.userPaused = false;
     this.current = null;
+    if (this.prefetchTimer) {
+      clearTimeout(this.prefetchTimer);
+      this.prefetchTimer = null;
+    }
     if (this.currentSource) {
       this.currentSource.kill();
       this.currentSource = null;
+    }
+    if (this.prepared) {
+      this.prepared.source.kill();
+      this.prepared = null;
     }
     this.deps.broadcaster.setTrack(null);
     this.deps.broadcaster.setNextSource(null);
