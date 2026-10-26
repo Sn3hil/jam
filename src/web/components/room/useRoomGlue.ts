@@ -63,11 +63,13 @@ export function useJoinedAudioSync(): void {
     }
   }, [itemId]);
 
-  // When room status is paused, pause local audio; when playing and joined, resume
+  // When room status is paused or idle, pause/flush local audio; when playing and joined, resume
   useEffect(() => {
     if (!joined) return;
     if (status === "paused") {
       audioEngine.pause();
+    } else if (status === "idle" || !itemId) {
+      audioEngine.stopAndFlush();
     } else if (status === "playing" && itemId) {
       if (!audioEngine.isPlaying()) {
         void audioEngine.resume();

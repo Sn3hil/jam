@@ -101,13 +101,17 @@ export class TrackEncoder implements FrameSource {
   }
 
   kill(): void {
-    if (this.killed || this.finished) return;
-    if (this.buffer.length > 0) {
-      this.finished = true;
-      this.readyResolve();
-      return;
-    }
+    if (this.killed) return;
     this.killed = true;
+    this.finished = true;
+    this.buffer.length = 0;
+    this.readyResolve();
+
+    this.proc.stdout?.removeAllListeners();
+    this.proc.stderr?.removeAllListeners();
+    this.proc.stdout?.destroy();
+    this.proc.stderr?.destroy();
+
     try {
       this.proc.kill("SIGTERM");
     } catch {
@@ -115,7 +119,7 @@ export class TrackEncoder implements FrameSource {
     }
     setTimeout(() => {
       try {
-        if (this.proc.exitCode === null && !this.finished) this.proc.kill("SIGKILL");
+        if (this.proc.exitCode === null) this.proc.kill("SIGKILL");
       } catch {
         /* already dead */
       }
